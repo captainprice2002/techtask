@@ -58,7 +58,7 @@ resource "aws_instance" "nginx_instance" {
   ami             = "ami-0233214e13e500f77" 
   instance_type   = "t2.micro"
   subnet_id       = aws_subnet.public_subnet.id
-  security_groups = [aws_security_group.nginx_sg.name]
+  vpc_security_group_ids = [aws_security_group.nginx_sg.id]
 
   tags = {
     Name = "Nginx-Grafana-Server"
