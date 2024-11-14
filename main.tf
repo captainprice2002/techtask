@@ -55,7 +55,7 @@ resource "aws_security_group" "nginx_sg" {
 
 
 resource "aws_instance" "nginx_instance" {
-  ami             = "ami-0c55b159cbfafe1f0" 
+  ami             = "ami-0233214e13e500f77" 
   instance_type   = "t2.micro"
   subnet_id       = aws_subnet.public_subnet.id
   security_groups = [aws_security_group.nginx_sg.name]
