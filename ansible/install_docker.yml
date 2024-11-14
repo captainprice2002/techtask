@@ -1,0 +1,20 @@
+- name: Install Docker and Docker Compose on Amazon Linux
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Docker
+      amazon.aws.amazon_linux_extras:
+        package: docker
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-`uname -s`-`uname -m`
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'

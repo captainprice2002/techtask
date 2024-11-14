@@ -1,0 +1,28 @@
+- name: Deploy Prometheus, Grafana, and NGINX with Docker Compose
+  hosts: monitoring_server
+  become: true
+  tasks:
+    - name: Clone the Docker Compose repository
+      git:
+        repo: 'https://github.com/Einsteinish/Docker-Compose-Prometheus-and-Grafana'
+        dest: /opt/monitoring
+        version: master
+
+    - name: Add Prometheus configuration for custom metrics
+      copy:
+        dest: /opt/monitoring/prometheus/prometheus.yml
+        content: |
+          global:
+            scrape_interval: 15s
+          scrape_configs:
+            - job_name: 'nginx_server'
+              static_configs:
+                - targets: ['localhost:80']  
+            - job_name: 'docker'
+              static_configs:
+                - targets: ['localhost:9090']
+
+    - name: Start Docker Compose services
+      command: docker-compose up -d
+      args:
+        chdir: /opt/monitoring
