@@ -19,12 +19,10 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
 
-      - name: Retrieve Instance IP
-        run: echo "INSTANCE_IP=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
 
       - name: SSH and Install Ansible
         env:
-          INSTANCE_IP: ${{ env.INSTANCE_IP }}
+          INSTANCE_IP: ${{ secrets.INSTANCE_IP }}
         run: |
           echo "Connecting to instance at $INSTANCE_IP"
           ssh -o StrictHostKeyChecking=no ec2-user@$INSTANCE_IP << 'EOF'
