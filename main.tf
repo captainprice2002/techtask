@@ -46,7 +46,7 @@ resource "aws_security_group" "nginx_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Replace with your IP CIDR for better security
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
@@ -82,16 +82,33 @@ resource "aws_instance" "nginx_instance" {
 
   user_data = <<-EOF
     #!/bin/bash
+    
+    while pgrep -x "yum" >/dev/null; do
+      echo "Waiting for yum lock to release..."
+      sleep 5
+    done
+
+    
     yum update -y
-    amazon-linux-extras install ansible2 docker -y
+    amazon-linux-extras install ansible2 docker nginx1 -y
     systemctl start docker
     systemctl enable docker
+    systemctl start nginx
+    systemctl enable nginx
+
+   
+    yum install -y git
+
+   
+    if [ ! -d "/home/ec2-user/techtask" ]; then
+      git clone https://github.com/captainprice2002/techtask.git /home/ec2-user/techtask
+    else
+      echo "Directory /home/ec2-user/techtask already exists, skipping clone."
+    fi
   EOF
 
   provisioner "remote-exec" {
     inline = [
-      "sudo yum install -y git",
-      "git clone https://github.com/captainprice2002/techtask.git /home/ec2-user",
       "ansible-playbook /home/ec2-user/techtask/ansible/install_docker.yml",
       "ansible-playbook /home/ec2-user/techtask/ansible/deploy_monitoring.yml",
       "ansible-playbook /home/ec2-user/techtask/ansible/deploy_nginx.yml",
