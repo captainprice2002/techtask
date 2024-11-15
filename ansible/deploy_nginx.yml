@@ -1,5 +1,5 @@
 - name: Deploy and configure NGINX on Amazon Linux
-  hosts: web_server
+  hosts: localhost
   become: true
   tasks:
     - name: Install NGINX
