@@ -55,11 +55,13 @@ jobs:
         
       - name: Retrieve Instance IP
         run: |
-          INSTANCE_IP=$(terraform output -raw instance_ip)
+          terraform output -raw instance_ip > instance_ip.txt
+          INSTANCE_IP=$(cat instance_ip.txt | tr -d '\r')
           echo "INSTANCE_IP=$INSTANCE_IP" >> $GITHUB_ENV
 
       - name: Display Instance IP for Debugging
         run: echo $INSTANCE_IP
+
 
 
         
