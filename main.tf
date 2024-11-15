@@ -4,10 +4,10 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket         = "tfstate-luka" 
-    key            = "terraform/state/terraform.tfstate" 
+    bucket         = "tfstate-luka"
+    key            = "terraform/state/terraform.tfstate"
     region         = "eu-north-1"
-    encrypt        = true 
+    encrypt        = true
   }
 }
 
@@ -43,17 +43,17 @@ resource "aws_security_group" "nginx_sg" {
   vpc_id = aws_vpc.my_vpc.id
 
   ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Replace with your IP CIDR for better security
+  }
+
+  ingress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Restrict this to your IP for better security
   }
 
   egress {
@@ -64,10 +64,15 @@ resource "aws_security_group" "nginx_sg" {
   }
 }
 
+resource "aws_key_pair" "my_key" {
+  key_name   = "my-key"
+  public_key = file("path/to/my-key.pub") 
+
 resource "aws_instance" "nginx_instance" {
-  ami             = "ami-01f5d894355bd0f64" 
-  instance_type   = "t3.medium"
-  subnet_id       = aws_subnet.public_subnet.id
+  ami                  = "ami-01f5d894355bd0f64"
+  instance_type        = "t3.medium"
+  subnet_id            = aws_subnet.public_subnet.id
+  key_name             = aws_key_pair.my_key.key_name
   vpc_security_group_ids = [aws_security_group.nginx_sg.id]
 
   tags = {
@@ -95,11 +100,10 @@ resource "aws_instance" "nginx_instance" {
     ]
 
     connection {
-      type     = "ssh"
-      user     = "ec2-user"
-      host     = self.public_ip
-      insecure = true
-    }
+      type        = "ssh"
+      user        = "ec2-user"
+      host        = self.public_ip
+      private_key = file("~/.ssh/my-key") 
   }
 }
 
