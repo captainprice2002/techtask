@@ -108,7 +108,7 @@ resource "aws_instance" "nginx_instance" {
 
 resource "aws_eip_association" "eip_assoc" {
   instance_id   = aws_instance.nginx_instance.id
-  allocation_id = "eipalloc-xxxxxxxx" # Replace with the actual Allocation ID for EIP 13.48.181.112
+  allocation_id = "eipalloc-05336f25f05dffb17" # EIP 13.48.181.112
 }
 
 output "instance_ip" {
