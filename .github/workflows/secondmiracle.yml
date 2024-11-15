@@ -1,0 +1,44 @@
+name: Ansible Configure
+
+on:
+  workflow_run:
+    workflows: ["Terraform Deployment"]
+    types:
+      - completed
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install SSH Key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+
+      - name: Retrieve Instance IP
+        run: echo "INSTANCE_IP=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
+
+      - name: SSH and Install Ansible
+        env:
+          INSTANCE_IP: ${{ env.INSTANCE_IP }}
+        run: |
+          echo "Connecting to instance at $INSTANCE_IP"
+          ssh -o StrictHostKeyChecking=no ec2-user@$INSTANCE_IP << 'EOF'
+            sudo amazon-linux-extras enable ansible2
+            sudo yum install -y ansible
+            ansible --version
+          EOF
+
+      - name: Run Ansible Playbooks
+        env:
+          INSTANCE_IP: ${{ env.INSTANCE_IP }}
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@$INSTANCE_IP << 'EOF'
+            ansible-playbook /home/ec2-user/techtask/ansible/install_docker.yml
+            ansible-playbook /home/ec2-user/techtask/ansible/deploy_monitoring.yml
+            ansible-playbook /home/ec2-user/techtask/ansible/deploy_nginx.yml
+          EOF
