@@ -82,65 +82,29 @@ resource "aws_instance" "nginx_instance" {
 
   user_data = <<-EOF
     #!/bin/bash
-    # Wait for any other yum process to complete
+
     while pgrep -x "yum" >/dev/null; do
       echo "Waiting for yum lock to release..."
       sleep 5
     done
 
-   
+    
     yum update -y
-    amazon-linux-extras enable ansible2
-    yum install -y ansible docker nginx git
+    amazon-linux-extras enable docker nginx1
+    yum install -y docker nginx git
 
-  
-    if ! command -v ansible-playbook &> /dev/null; then
-      echo "Ansible installation failed or not found in PATH."
-      exit 1
-    fi
-
-   
+    
     systemctl start docker
     systemctl enable docker
     systemctl start nginx
     systemctl enable nginx
 
-    
     if [ ! -d "/home/ec2-user/techtask" ]; then
       git clone https://github.com/captainprice2002/techtask.git /home/ec2-user/techtask
     else
       echo "Directory /home/ec2-user/techtask already exists, skipping clone."
     fi
   EOF
-
-  provisioner "remote-exec" {
-    inline = [
-      "echo 'Installing dependencies with ansible-playbook install_docker.yml'",
-      "ansible-playbook /home/ec2-user/techtask/ansible/install_docker.yml || { echo 'Failed: install_docker.yml'; exit 5; }",
-      
-      "echo 'Running monitoring deployment playbook'",
-      "ansible-playbook /home/ec2-user/techtask/ansible/deploy_monitoring.yml || { echo 'Failed: deploy_monitoring.yml'; exit 5; }",
-      
-      "echo 'Running NGINX deployment playbook'",
-      "ansible-playbook /home/ec2-user/techtask/ansible/deploy_nginx.yml || { echo 'Failed: deploy_nginx.yml'; exit 5; }",
-      
-      "echo 'Removing old NGINX configurations'",
-      "sudo rm -rf /etc/nginx/sites-enabled/* || { echo 'Failed to remove old NGINX config'; exit 5; }",
-      
-      "echo 'Copying new NGINX configuration'",
-      "sudo cp /home/ec2-user/techtask/ansible/nginx/default.conf /etc/nginx/conf.d/ || { echo 'Failed to copy NGINX config'; exit 5; }",
-      
-      "echo 'Restarting NGINX service'",
-      "sudo systemctl restart nginx || { echo 'Failed to restart NGINX'; exit 5; }"
-    ]
-
-    connection {
-      type        = "ssh"
-      user        = "ec2-user"
-      host        = self.public_ip
-      private_key = file("~/.ssh/my-key") 
-    }
-  }
 }
 
 output "instance_ip" {
