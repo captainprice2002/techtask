@@ -52,3 +52,6 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve
+        
+      - name: Capture Instance IP
+        run: echo "INSTANCE_IP=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
