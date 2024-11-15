@@ -46,7 +46,7 @@ resource "aws_security_group" "nginx_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"] # Replace with your IP CIDR for better security
   }
 
   ingress {
@@ -82,13 +82,13 @@ resource "aws_instance" "nginx_instance" {
 
   user_data = <<-EOF
     #!/bin/bash
-    
+    # Wait for any other yum process to complete
     while pgrep -x "yum" >/dev/null; do
       echo "Waiting for yum lock to release..."
       sleep 5
     done
 
-    
+    # Install required packages
     yum update -y
     amazon-linux-extras install ansible2 docker nginx1 -y
     systemctl start docker
@@ -96,10 +96,10 @@ resource "aws_instance" "nginx_instance" {
     systemctl start nginx
     systemctl enable nginx
 
-   
+    # Install git
     yum install -y git
 
-   
+    # Clone the repository into a dedicated directory
     if [ ! -d "/home/ec2-user/techtask" ]; then
       git clone https://github.com/captainprice2002/techtask.git /home/ec2-user/techtask
     else
@@ -109,12 +109,23 @@ resource "aws_instance" "nginx_instance" {
 
   provisioner "remote-exec" {
     inline = [
-      "ansible-playbook /home/ec2-user/techtask/ansible/install_docker.yml",
-      "ansible-playbook /home/ec2-user/techtask/ansible/deploy_monitoring.yml",
-      "ansible-playbook /home/ec2-user/techtask/ansible/deploy_nginx.yml",
-      "sudo rm -rf /etc/nginx/sites-enabled/*",
-      "sudo cp /home/ec2-user/techtask/ansible/nginx/default.conf /etc/nginx/conf.d/",
-      "sudo systemctl restart nginx"
+      "echo 'Installing dependencies with ansible-playbook install_docker.yml'",
+      "ansible-playbook /home/ec2-user/techtask/ansible/install_docker.yml || { echo 'Failed: install_docker.yml'; exit 5; }",
+      
+      "echo 'Running monitoring deployment playbook'",
+      "ansible-playbook /home/ec2-user/techtask/ansible/deploy_monitoring.yml || { echo 'Failed: deploy_monitoring.yml'; exit 5; }",
+      
+      "echo 'Running NGINX deployment playbook'",
+      "ansible-playbook /home/ec2-user/techtask/ansible/deploy_nginx.yml || { echo 'Failed: deploy_nginx.yml'; exit 5; }",
+      
+      "echo 'Removing old NGINX configurations'",
+      "sudo rm -rf /etc/nginx/sites-enabled/* || { echo 'Failed to remove old NGINX config'; exit 5; }",
+      
+      "echo 'Copying new NGINX configuration'",
+      "sudo cp /home/ec2-user/techtask/ansible/nginx/default.conf /etc/nginx/conf.d/ || { echo 'Failed to copy NGINX config'; exit 5; }",
+      
+      "echo 'Restarting NGINX service'",
+      "sudo systemctl restart nginx || { echo 'Failed to restart NGINX'; exit 5; }"
     ]
 
     connection {
