@@ -55,21 +55,7 @@ jobs:
         
       - name: Retrieve Instance IP
         run: |
-          # Run terraform output and redirect any errors
-          INSTANCE_IP=$(terraform output -raw instance_ip 2>error_log.txt | tr -d '\n\r')
-
-          # Check if INSTANCE_IP is empty, log error if needed
-          if [[ -z "$INSTANCE_IP" ]]; then
-            echo "Failed to retrieve INSTANCE_IP. Check error_log.txt for details."
-            cat error_log.txt
-            exit 1
-          else
-            echo "INSTANCE_IP=$INSTANCE_IP" >> $GITHUB_ENV
-            echo "Successfully set INSTANCE_IP to $INSTANCE_IP"
-          fi
-
-      - name: Display Instance IP for Debugging
-        run: echo $INSTANCE_IP
+          echo "$(terraform output -raw instance_ip)" 
 
 
 
