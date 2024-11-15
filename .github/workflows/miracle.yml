@@ -39,8 +39,6 @@ jobs:
           chmod 600 ~/.ssh/my-key
 
       
-      - name: Destroy infra
-        run: teerraform destroy
        
       - name: Initialize Terraform
         run: terraform init
