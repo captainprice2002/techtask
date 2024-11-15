@@ -46,7 +46,7 @@ resource "aws_security_group" "nginx_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Replace with your IP CIDR for better security
+    cidr_blocks = ["0.0.0.0/0"] 
   }
 
   ingress {
@@ -88,18 +88,24 @@ resource "aws_instance" "nginx_instance" {
       sleep 5
     done
 
-    # Install required packages
+   
     yum update -y
-    amazon-linux-extras install ansible2 docker nginx1 -y
+    amazon-linux-extras enable ansible2
+    yum install -y ansible docker nginx git
+
+  
+    if ! command -v ansible-playbook &> /dev/null; then
+      echo "Ansible installation failed or not found in PATH."
+      exit 1
+    fi
+
+   
     systemctl start docker
     systemctl enable docker
     systemctl start nginx
     systemctl enable nginx
 
-    # Install git
-    yum install -y git
-
-    # Clone the repository into a dedicated directory
+    
     if [ ! -d "/home/ec2-user/techtask" ]; then
       git clone https://github.com/captainprice2002/techtask.git /home/ec2-user/techtask
     else
