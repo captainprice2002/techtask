@@ -66,8 +66,9 @@ resource "aws_security_group" "nginx_sg" {
 
 resource "aws_key_pair" "my_key" {
   key_name   = "my-key"
-  public_key = file("path/to/my-key.pub") 
-
+  public_key = file("${path.module}/my-key.pub") 
+}
+ 
 resource "aws_instance" "nginx_instance" {
   ami                  = "ami-01f5d894355bd0f64"
   instance_type        = "t3.medium"
