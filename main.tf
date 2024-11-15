@@ -58,8 +58,8 @@ resource "aws_security_group" "nginx_sg" {
 }
 
 resource "aws_instance" "nginx_instance" {
-  ami             = "ami-00da1738201099b91" 
-  instance_type   = "t2.micro"
+  ami             = "ami-01f5d894355bd0f64" 
+  instance_type   = "t3.medium"
   subnet_id       = aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.nginx_sg.id]
 
