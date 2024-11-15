@@ -55,7 +55,7 @@ jobs:
         
       - name: Retrieve Instance IP
         run: |
-          terraform output -raw instance_ip)
+          terraform output -raw instance_ip
           echo "now with echo"
           echo $instance_ip
 
