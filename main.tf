@@ -105,6 +105,7 @@ resource "aws_instance" "nginx_instance" {
       user        = "ec2-user"
       host        = self.public_ip
       private_key = file("~/.ssh/my-key") 
+    }
   }
 }
 
