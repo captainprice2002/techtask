@@ -24,8 +24,11 @@ jobs:
         env:
           INSTANCE_IP: ${{ secrets.INSTANCE_IP }}
         run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/my-key
+          chmod 600 ~/.ssh/my-key
           echo "Connecting to instance at $INSTANCE_IP"
-          ssh -o StrictHostKeyChecking=no ec2-user@$INSTANCE_IP << 'EOF'
+          ssh -i ~/.ssh/my-key ec2-user@$INSTANCE_IP << 'EOF'
             sudo amazon-linux-extras enable ansible2
             sudo yum install -y ansible
             ansible --version
