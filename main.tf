@@ -88,12 +88,10 @@ resource "aws_instance" "nginx_instance" {
       sleep 5
     done
 
-    
     yum update -y
     amazon-linux-extras enable docker nginx1
     yum install -y docker nginx git
 
-    
     systemctl start docker
     systemctl enable docker
     systemctl start nginx
@@ -105,6 +103,12 @@ resource "aws_instance" "nginx_instance" {
       echo "Directory /home/ec2-user/techtask already exists, skipping clone."
     fi
   EOF
+}
+
+
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = aws_instance.nginx_instance.id
+  allocation_id = "eipalloc-xxxxxxxx" # Replace with the actual Allocation ID for EIP 13.48.181.112
 }
 
 output "instance_ip" {
