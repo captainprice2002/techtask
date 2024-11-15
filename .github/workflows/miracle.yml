@@ -58,7 +58,7 @@ jobs:
           echo $instance_ip
 
       - name: Destroy infra
-        run: terraform destroy
+        run: terraform destroy -auto-approve
 
 
 
