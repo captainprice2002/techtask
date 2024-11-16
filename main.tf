@@ -43,14 +43,14 @@ resource "aws_security_group" "all_open" {
   ingress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"
+    protocol    = "-1" # Allow all protocols
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"
+    protocol    = "-1" # Allow all protocols
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -63,7 +63,7 @@ resource "aws_instance" "nginx_server" {
   ami           = "ami-05fd9662cc12a5769"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.main.id
-  security_groups = [aws_security_group.all_open.name]
+  security_group_ids = [aws_security_group.all_open.id]
   key_name      = aws_key_pair.default.key_name
 
   tags = {
@@ -81,7 +81,7 @@ resource "aws_instance" "monitoring_server" {
   ami           = "ami-05fd9662cc12a5769"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.main.id
-  security_groups = [aws_security_group.all_open.name]
+  security_group_ids = [aws_security_group.all_open.id]
   key_name      = aws_key_pair.default.key_name
 
   tags = {
