@@ -22,6 +22,13 @@ jobs:
       - name: Disable Host Key Checking
         run: |
           echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+      - name: Create inventory file
+        run: |
+         echo "[nginx-server]" > ansible/inventories/inventory.ini
+         echo "nginx ansible_host=${{ secrets.NGINX_INSTANCE_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ansible/inventories/inventory.ini
+         echo "[monitoring-server]" >> ansible/inventories/inventory.ini
+         echo "monitoring ansible_host=<MONITORING_SERVER_IP> ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ansible/inventories/inventory.ini
+
 
       - name: Run Ansible for NGINX Server
         run: ansible-playbook -i ansible/inventories/inventory.ini ansible/playbooks/setup-nginx.yml
