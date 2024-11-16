@@ -43,14 +43,14 @@ resource "aws_security_group" "all_open" {
   ingress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1" # Allow all protocols
+    protocol    = "-1" # dont forget to change after setup!!!!1
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1" # Allow all protocols
+    protocol    = "-1" # change after set-up!!!!
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -60,8 +60,8 @@ resource "aws_security_group" "all_open" {
 }
 
 resource "aws_instance" "nginx_server" {
-  ami           = "ami-05fd9662cc12a5769"
-  instance_type = "t2.micro"
+  ami           = "ami-08eb150f611ca277f" 
+  instance_type = "t3.micro"             
   subnet_id     = aws_subnet.main.id
   vpc_security_group_ids = [aws_security_group.all_open.id]
   key_name      = aws_key_pair.default.key_name
@@ -78,8 +78,8 @@ resource "aws_instance" "nginx_server" {
 }
 
 resource "aws_instance" "monitoring_server" {
-  ami           = "ami-05fd9662cc12a5769"
-  instance_type = "t2.micro"
+  ami           = "ami-08eb150f611ca277f" 
+  instance_type = "t3.micro"              
   subnet_id     = aws_subnet.main.id
   vpc_security_group_ids = [aws_security_group.all_open.id]
   key_name      = aws_key_pair.default.key_name
