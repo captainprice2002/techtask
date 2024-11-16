@@ -2,7 +2,6 @@ provider "aws" {
   region = "eu-north-1"
 }
 
-
 terraform {
   backend "s3" {
     bucket         = "tfstate-luka"
@@ -12,12 +11,10 @@ terraform {
   }
 }
 
-
 resource "aws_key_pair" "default" {
   key_name   = "key-pair"
   public_key = file("${path.module}/my-key.pub")
 }
-
 
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
@@ -28,7 +25,6 @@ resource "aws_vpc" "main" {
   }
 }
 
-
 resource "aws_subnet" "main" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
@@ -38,7 +34,6 @@ resource "aws_subnet" "main" {
     Name = "main-subnet"
   }
 }
-
 
 resource "aws_security_group" "all_open" {
   name        = "allow-all"
@@ -63,7 +58,6 @@ resource "aws_security_group" "all_open" {
     Name = "allow-all"
   }
 }
-
 
 resource "aws_instance" "nginx_server" {
   ami           = "ami-05fd9662cc12a5769"
@@ -101,19 +95,12 @@ resource "aws_instance" "monitoring_server" {
               EOF
 }
 
-
-resource "aws_eip" "nginx_ip" {
-  instance = aws_instance.nginx_server.id
-  public_ip = "13.48.181.112"
-  tags = {
-    Name = "nginx-server-ip"
-  }
+resource "aws_eip_association" "nginx_ip_assoc" {
+  instance_id   = aws_instance.nginx_server.id
+  allocation_id = "eipalloc-05336f25f05dffb17"
 }
 
-resource "aws_eip" "monitoring_ip" {
-  instance = aws_instance.monitoring_server.id
-  public_ip = "13.49.216.147"
-  tags = {
-    Name = "monitoring-server-ip"
-  }
+resource "aws_eip_association" "monitoring_ip_assoc" {
+  instance_id   = aws_instance.monitoring_server.id
+  allocation_id = "eipalloc-05c56b7f350a1f3b7"
 }
