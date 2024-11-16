@@ -25,6 +25,32 @@ resource "aws_vpc" "main" {
   }
 }
 
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "main-internet-gateway"
+  }
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
+
+  tags = {
+    Name = "public-route-table"
+  }
+}
+
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.main.id
+  route_table_id = aws_route_table.public.id
+}
+
 resource "aws_subnet" "main" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
@@ -43,14 +69,14 @@ resource "aws_security_group" "all_open" {
   ingress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1" # dont forget to change after setup!!!!1
+    protocol    = "-1" # Allow all protocols
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1" # change after set-up!!!!
+    protocol    = "-1" # Allow all protocols
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -60,8 +86,8 @@ resource "aws_security_group" "all_open" {
 }
 
 resource "aws_instance" "nginx_server" {
-  ami           = "ami-08eb150f611ca277f" 
-  instance_type = "t3.micro"             
+  ami           = "ami-08eb150f611ca277f"
+  instance_type = "t3.micro"
   subnet_id     = aws_subnet.main.id
   vpc_security_group_ids = [aws_security_group.all_open.id]
   key_name      = aws_key_pair.default.key_name
@@ -78,8 +104,8 @@ resource "aws_instance" "nginx_server" {
 }
 
 resource "aws_instance" "monitoring_server" {
-  ami           = "ami-08eb150f611ca277f" 
-  instance_type = "t3.micro"              
+  ami           = "ami-08eb150f611ca277f"
+  instance_type = "t3.micro"
   subnet_id     = aws_subnet.main.id
   vpc_security_group_ids = [aws_security_group.all_open.id]
   key_name      = aws_key_pair.default.key_name
