@@ -63,7 +63,7 @@ resource "aws_instance" "nginx_server" {
   ami           = "ami-05fd9662cc12a5769"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.main.id
-  security_group_ids = [aws_security_group.all_open.id]
+  vpc_security_group_ids = [aws_security_group.all_open.id]
   key_name      = aws_key_pair.default.key_name
 
   tags = {
@@ -81,7 +81,7 @@ resource "aws_instance" "monitoring_server" {
   ami           = "ami-05fd9662cc12a5769"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.main.id
-  security_group_ids = [aws_security_group.all_open.id]
+  vpc_security_group_ids = [aws_security_group.all_open.id]
   key_name      = aws_key_pair.default.key_name
 
   tags = {
