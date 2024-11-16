@@ -15,7 +15,7 @@ terraform {
 
 resource "aws_key_pair" "default" {
   key_name   = "key-pair"
-  public_key = file("${path.module}/key-pair.pub")
+  public_key = file("${path.module}/my-key.pub")
 }
 
 
