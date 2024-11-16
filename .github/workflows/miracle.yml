@@ -3,10 +3,10 @@ name: Terraform Deployment
 on:
   push:
     branches:
-      - main  
+      - Infrastructure  
   pull_request:
     branches:
-      - main  
+      - Infrastructure  
 
 jobs:
   terraform:
