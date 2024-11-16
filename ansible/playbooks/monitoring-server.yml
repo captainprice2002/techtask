@@ -1,7 +1,0 @@
----
-- name: Configure Monitoring Server
-  hosts: monitoring-server
-  become: true
-  roles:
-    - prometheus
-    - grafana

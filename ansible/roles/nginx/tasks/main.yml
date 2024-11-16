@@ -1,16 +1,27 @@
----
 - name: Install NGINX
   apt:
     name: nginx
-    state: present
+    state: latest
     update_cache: yes
 
-- name: Copy NGINX configuration
+- name: Copy NGINX default configuration
   template:
-    src: main.conf
-    dest: /etc/nginx/conf.d/main.conf
+    src: default.conf
+    dest: /etc/nginx/conf.d/default.conf
 
 - name: Restart NGINX
   service:
     name: nginx
     state: restarted
+
+- name: Install Prometheus Node Exporter
+  apt:
+    name: prometheus-node-exporter
+    state: latest
+    update_cache: yes
+
+- name: Start and enable Node Exporter
+  service:
+    name: prometheus-node-exporter
+    state: started
+    enabled: yes

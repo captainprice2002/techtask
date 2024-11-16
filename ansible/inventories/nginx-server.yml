@@ -1,6 +1,0 @@
-all:
-  hosts:
-    nginx-server:
-      ansible_host: ${{ secrets.NGINX_INSTANCE_IP }}
-      ansible_user: ubuntu
-      ansible_ssh_private_key_file: ~/.ssh/my-key
