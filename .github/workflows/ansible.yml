@@ -1,4 +1,4 @@
-name: Deploy Monitoring + NGINX
+name: Ansible Deployment
 
 on:
   push:
@@ -10,30 +10,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Add SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/my-key
-          chmod 600 ~/.ssh/my-key
+      # Step 2: Ensure Python is available
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
-      - name: Disable Host Key Checking
+      # Step 3: Install Ansible
+      - name: Install Ansible
         run: |
-          echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+          python -m pip install --upgrade pip
+          pip install ansible
+
+      # Step 4: Ensure Ansible roles path exists
+      - name: Check roles path
+        run: |
+          mkdir -p ansible/roles
+
+      # Step 5: Install required Ansible collections
+      - name: Install Ansible Collections
+        run: ansible-galaxy collection install -r ansible/requirements.yml
+
+      # Step 6: Dynamically create inventory file
       - name: Create inventory file
         run: |
-         echo "[nginx-server]" > ansible/inventories/inventory.ini
-         echo "nginx ansible_host=${{ secrets.NGINX_INSTANCE_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ansible/inventories/inventory.ini
-         echo "[monitoring-server]" >> ansible/inventories/inventory.ini
-         echo "monitoring ansible_host=<MONITORING_SERVER_IP> ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ansible/inventories/inventory.ini
+          echo "[nginx-server]" > ansible/inventories/inventory.ini
+          echo "nginx ansible_host=${{ secrets.NGINX_INSTANCE_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ansible/inventories/inventory.ini
+          echo "[monitoring-server]" >> ansible/inventories/inventory.ini
+          echo "monitoring ansible_host=${{ secrets.MONITORING_INSTANCE_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ansible/inventories/inventory.ini
 
-
+      # Step 7: Run the NGINX Setup Playbook
       - name: Run Ansible for NGINX Server
         run: ansible-playbook -i ansible/inventories/inventory.ini ansible/playbooks/setup-nginx.yml
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: False
 
-
+      # Step 8: Run the Monitoring Setup Playbook
       - name: Run Ansible for Monitoring Server
-        run: |
-          ansible-playbook -i ansible/inventories/monitoring-server.yml ansible/playbooks/monitoring-server.yml
+        run: ansible-playbook -i ansible/inventories/inventory.ini ansible/playbooks/setup-monitoring.yml
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: False
