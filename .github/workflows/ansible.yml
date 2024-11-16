@@ -24,8 +24,8 @@ jobs:
           echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 
       - name: Run Ansible for NGINX Server
-        run: |
-          ansible-playbook -i ansible/inventories/nginx-server.yml ansible/playbooks/nginx-server.yml
+        run: ansible-playbook -i ansible/inventories/inventory.ini ansible/playbooks/setup-nginx.yml
+
 
       - name: Run Ansible for Monitoring Server
         run: |
