@@ -1,0 +1,9 @@
+---
+- name: Install Grafana
+  shell: |
+    wget https://dl.grafana.com/oss/release/grafana-*.linux-amd64.tar.gz
+    tar -xzvf grafana-*.linux-amd64.tar.gz
+    sudo mv grafana-*/ /usr/share/grafana
+    sudo /usr/share/grafana/bin/grafana-server &
+  args:
+    creates: /usr/share/grafana/bin/grafana-server

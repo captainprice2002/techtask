@@ -1,0 +1,16 @@
+---
+- name: Install NGINX
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Copy NGINX configuration
+  template:
+    src: main.conf
+    dest: /etc/nginx/conf.d/main.conf
+
+- name: Restart NGINX
+  service:
+    name: nginx
+    state: restarted

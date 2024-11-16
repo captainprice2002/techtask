@@ -1,47 +1,32 @@
-name: Ansible Configure
+name: Deploy Monitoring + NGINX
 
 on:
-  workflow_run:
-    workflows: ["Terraform Deployment"]
-    types:
-      - completed
+  push:
+    branches:
+      - ansible
 
 jobs:
-  configure:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Install SSH Key
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
-
-      - name: SSH and Install Ansible
-        env:
-          INSTANCE_IP: ${{ secrets.INSTANCE_IP }}
+      - name: Add SSH Key
         run: |
-          echo "Connecting to instance at $INSTANCE_IP"
-          for i in {1..5}; do
-            ssh -o StrictHostKeyChecking=no -i ~/.ssh/my-key ec2-user@$13.48.181.112 << 'EOF'
-              sudo amazon-linux-extras enable ansible2
-              sudo yum install -y ansible
-              ansible --version
-            EOF
-            if [[ $? -eq 0 ]]; then break; fi
-            echo "Retrying SSH connection..."
-            sleep 10
-          done
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/my-key
+          chmod 600 ~/.ssh/my-key
 
-      - name: Run Ansible Playbooks
-        env:
-          INSTANCE_IP: ${{ secrets.INSTANCE_IP }}
+      - name: Disable Host Key Checking
         run: |
-          echo "Running Ansible playbooks on $INSTANCE_IP"
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/my-key ec2-user@$INSTANCE_IP << 'EOF'
-            ansible-playbook /home/ec2-user/techtask/ansible/install_docker.yml
-            ansible-playbook /home/ec2-user/techtask/ansible/deploy_monitoring.yml
-            ansible-playbook /home/ec2-user/techtask/ansible/deploy_nginx.yml
-          EOF
+          echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+
+      - name: Run Ansible for NGINX Server
+        run: |
+          ansible-playbook -i ansible/inventories/nginx-server.yml ansible/playbooks/nginx-server.yml
+
+      - name: Run Ansible for Monitoring Server
+        run: |
+          ansible-playbook -i ansible/inventories/monitoring-server.yml ansible/playbooks/monitoring-server.yml
