@@ -1,0 +1,32 @@
+name: Deploy Monitoring + NGINX
+
+on:
+  push:
+    branches:
+      - ansible
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Add SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/my-key
+          chmod 600 ~/.ssh/my-key
+
+      - name: Disable Host Key Checking
+        run: |
+          echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+
+      - name: Run Ansible for NGINX Server
+        run: |
+          ansible-playbook -i ansible/inventories/nginx-server.yml ansible/playbooks/nginx-server.yml
+
+      - name: Run Ansible for Monitoring Server
+        run: |
+          ansible-playbook -i ansible/inventories/monitoring-server.yml ansible/playbooks/monitoring-server.yml
