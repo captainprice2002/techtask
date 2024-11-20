@@ -40,20 +40,20 @@ jobs:
 
       
        
-      - name: Initialize Terraform
-        run: terraform init
+  #    - name: Initialize Terraform
+   #     run: terraform init
 
-      - name: Terraform Plan
-        run: terraform plan
-        id: plan
+  #    - name: Terraform Plan
+  #      run: terraform plan
+ #       id: plan
 
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/infrastructure'
-        run: terraform apply -auto-approve
+   #   - name: Terraform Apply
+    #    if: github.ref == 'refs/heads/infrastructure'
+     #   run: terraform apply -auto-approve
         
 
-    #  - name: Destroy infra
-    #    run: terraform destroy -auto-approve
+      - name: Destroy infra
+        run: terraform destroy -auto-approve
 
 
 
